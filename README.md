@@ -1,2 +1,1 @@
-# sicbo-online
-Phong000
+index.html
