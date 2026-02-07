@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>SIC BO – TÀI XỈU (XU ẢO)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#7a0000,#2b0000);
+  font-family:Arial;
+  color:#ffd700;
+}
+.wrap{max-width:420px;margin:auto;padding:10px}
+.panel{
+  background:rgba(0,0,0,.7);
+  border:2px solid gold;
+  border-radius:14px;
+  padding:10px;
+  margin-top:10px;
+}
+h2{text-align:center;margin:5px 0}
+input,button{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin:4px;
+}
+button{font-weight:bold}
+.tai{background:#c62828;color:#fff}
+.xiu{background:#1565c0;color:#fff}
+#dice span{font-size:40px;margin:5px}
+#chat{
+  height:120px;
+  overflow:auto;
+  background:#000;
+  border-radius:10px;
+  padding:5px;
+  font-size:14px;
+}
+#pet{
+  position:fixed;
+  right:10px;
+  bottom:10px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:radial-gradient(circle,#ffeb3b,#ff9800);
+  box-shadow:0 0 20px #ff0;
+  font-size:32px;
+  line-height:60px;
+  text-align:center;
+  cursor:pointer;
+}
+.admin{color:#00e5ff;font-weight:bold}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <h2>🎲 SIC BO – TÀI XỈU</h2>
+
+  <!-- LOGIN -->
+  <div class="panel" id="login">
+    <input id="name" placeholder="Nhập tài khoản">
+    <button onclick="join()">Vào bàn</button>
+  </div>
+
+  <!-- GAME -->
+  <div class="panel" id="game" style="display:none">
+    <div id="info"></div>
+    <p>⏱ Thời gian: <b id="time">49</b>s</p>
+
+    <button class="tai" onclick="bet('TÀI')">CƯỢC TÀI</button>
+    <button class="xiu" onclick="bet('XỈU')">CƯỢC XỈU</button>
+
+    <div id="dice"></div>
+    <div id="result"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="panel">
+    <b>💬 Chat</b>
+    <div id="chat"></div>
+    <input id="msg" placeholder="Nhập chat">
+    <button onclick="send()">Gửi</button>
+  </div>
+</div>
+
+<div id="pet" onclick="petAnalyze()">🐉</div>
+
+<script>
+/* ====== STATE ====== */
+let user="";
+let isAdmin=false;
+let time=49;
+let timer=null;
+let betSide="";
+const adminName="Phong20121";
+
+/* ====== LOGIN ====== */
+function join(){
+  user=document.getElementById("name").value.trim();
+  if(!user){alert("Nhập tài khoản");return;}
+  isAdmin = (user===adminName);
+
+  document.getElementById("login").style.display="none";
+  document.getElementById("game").style.display="block";
+
+  document.getElementById("info").innerHTML =
+    isAdmin ? "👑 <span class='admin'>ADMIN Phong20121</span>" :
+              "👤 Người chơi: <b>"+user+"</b>";
+
+  systemMsg(user+" đã vào bàn");
+  startRound();
+}
+
+/* ====== GAME LOOP ====== */
+function startRound(){
+  clearInterval(timer);
+  time=49;
+  document.getElementById("time").innerText=time;
+  document.getElementById("dice").innerHTML="";
+  document.getElementById("result").innerHTML="";
+  betSide="";
+
+  timer=setInterval(()=>{
+    time--;
+    document.getElementById("time").innerText=time;
+    if(time<=0){
+      clearInterval(timer);
+      rollDice();
+    }
+  },1000);
+}
+
+function bet(side){
+  betSide=side;
+  systemMsg(user+" đặt "+side);
+}
+
+function rollDice(){
+  let d1=rand(),d2=rand(),d3=rand();
+  let sum=d1+d2+d3;
+  let result = sum>=11 ? "TÀI" : "XỈU";
+
+  document.getElementById("dice").innerHTML =
+    `<span>🎲${d1}</span><span>🎲${d2}</span><span>🎲${d3}</span>`;
+
+  document.getElementById("result").innerHTML =
+    "Kết quả: <b>"+result+"</b>";
+
+  if(betSide){
+    systemMsg(user+" cược "+betSide+" → "+result);
+  }
+
+  setTimeout(startRound,4000);
+}
+
+function rand(){return 1+Math.floor(Math.random()*6)}
+
+/* ====== CHAT (LOCAL DEMO) ====== */
+function send(){
+  let m=document.getElementById("msg").value.trim();
+  if(!m)return;
+  addChat("<b>"+user+":</b> "+m);
+  document.getElementById("msg").value="";
+}
+
+function addChat(html){
+  let c=document.getElementById("chat");
+  c.innerHTML+=html+"<br>";
+  c.scrollTop=9999;
+}
+
+function systemMsg(t){
+  addChat("<span style='color:#aaa'>[Hệ thống] "+t+"</span>");
+}
+
+/* ====== PET ====== */
+function petAnalyze(){
+  if(!isAdmin){
+    alert("Pet chỉ dành cho ADMIN");
+    return;
+  }
+  let g = Math.random()>0.5 ? "TÀI" : "XỈU";
+  alert("🐉 Pet gợi ý (demo): "+g);
+}
+</script>
+</body>
+</html>
